@@ -1,0 +1,46 @@
+{
+    "name": "burnthebook/craft3-livebuzz",
+    "description": "Pulls Exhibitors from the the LiveBuzz API to a website, it also updates and removes Exhibitors.",
+    "type": "craft-plugin",
+    "version": "0.0.2",
+    "keywords": [
+        "craft",
+        "cms",
+        "craftcms",
+        "craft-plugin",
+        "livebuzz"
+    ],
+    "support": {
+        "docs": "https://github.com/Burnthebook/craft3-livebuzz/blob/master/README.md",
+        "issues": "https://github.com/Burnthebook/craft3-livebuzz/issues"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jake Noble",
+            "homepage": "https://github.com/Burnthebook"
+        }
+    ],
+    "require": {
+        "craftcms/cms": "^3.0.0-RC1"
+    },
+    "autoload": {
+        "psr-4": {
+          "burnthebook\\livebuzz\\": "src/"
+        }
+    },
+    "extra": {
+        "name": "LiveBuzz",
+        "handle": "livebuzz",
+        "hasCpSettings": true,
+        "hasCpSection": true,
+        "changelogUrl": "https://raw.githubusercontent.com/Burnthebook/craft3-livebuzz/master/CHANGELOG.md",
+        "basePath": "src",
+        "components": {
+            "syncService": "burnthebook\\livebuzz\\services\\SyncService",
+            "tagsService": "burnthebook\\livebuzz\\services\\TagsService",
+            "twigService": "burnthebook\\livebuzz\\services\\TwigService"
+        },
+        "class": "burnthebook\\livebuzz\\LiveBuzz"
+    }
+}
