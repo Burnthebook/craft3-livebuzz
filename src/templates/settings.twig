@@ -1,0 +1,41 @@
+{# @var craft \craft\web\twig\variables\CraftVariable #}
+{#
+/**
+ * Livebuzz plugin for Craft CMS 3.x
+ *
+ * Livebuzz Settings.twig
+ *
+ * @author    Jake Noble
+ * @copyright Copyright (c) 2020 Burnthebook Ltd.
+ * @link      https://github.com/Burnthebook
+ * @package   Livebuzz
+ * @since     0.0.2
+ */
+#}
+
+{% import "_includes/forms" as forms %}
+
+{{ forms.textField({
+    label: 'URL'|t('livebuzz'),
+    instructions: 'Enter the URL to your Livebuzz JSON API.'|t('livebuzz'),
+    id: 'xmlUrl',
+    name: 'xmlUrl',
+    value: settings['xmlUrl']})
+}}
+
+{{ forms.textField({
+    label: 'Bearer'|t('livebuzz'),
+    instructions: 'Enter Bearer Authorisation for Livebuzz.'|t('livebuzz'),
+    id: 'authBearer',
+    name: 'authBearer',
+    value: settings['authBearer']})
+}}
+
+{{ forms.lightswitchField({
+    label: 'Auto Sync'|t('livebuzz'),
+    instructions: 'Automatically sync from the JSON feed.'|t('livebuzz') ~ ' ' ~ 'Sync interval'|t('livebuzz') ~ ': ' ~ (settings['syncDelay'] / 60) ~ ' ' ~ 'minutes'|t('livebuzz'),
+    id: 'autoSync',
+    name: 'autoSync',
+    on: settings['autoSync'],
+    value: 1})
+}}

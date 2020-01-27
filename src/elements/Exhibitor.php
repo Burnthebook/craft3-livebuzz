@@ -1,6 +1,6 @@
 <?php
 /**
- * LiveBuzz plugin for Craft CMS 3.x
+ * Livebuzz plugin for Craft CMS 3.x
  *
  * @link      https://github.com/Burnthebook
  * @copyright Copyright (c) 2020 Burnthebook Ltd.
@@ -15,7 +15,7 @@ use burnthebook\livebuzz\elements\db\ExhibitorQuery;
 
 /**
  * @author    Jake Noble
- * @package   LiveBuzz
+ * @package   Livebuzz
  * @since     0.0.1
  */
 class Exhibitor extends Element

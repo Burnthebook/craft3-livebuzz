@@ -1,0 +1,24 @@
+{# @var craft \craft\web\twig\variables\CraftVariable #}
+{#
+/**
+ * Livebuzz plugin for Craft CMS 3.x
+ *
+ * Livebuzz index.twig
+ *
+ * @author    Jake Noble
+ * @copyright Copyright (c) 2020 Burnthebook Ltd.
+ * @link      https://github.com/Burnthebook
+ * @package   Livebuzz
+ * @since     0.0.2
+ */
+#}
+
+{% extends "_layouts/elementindex" %}
+
+{% set title = "Exhibitors"|t('livebuzz') %}
+{% set selectedSubnavItem = 'exhibitors' %}
+{% set elementType = 'burnthebook\\livebuzz\\elements\\Exhibitor' %}
+
+{% block actionButton %}
+    <a href="{{ url('livebuzz/sync-now') }}" class="btn submit">{{ "Sync Now"|t('livebuzz') }}</a>
+{% endblock %}

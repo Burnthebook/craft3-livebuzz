@@ -1,6 +1,6 @@
 <?php
 /**
- * LiveBuzz plugin for Craft CMS 3.x
+ * Livebuzz plugin for Craft CMS 3.x
  *
  * @link      https://github.com/Burnthebook
  * @copyright Copyright (c) 2020 Burnthebook Ltd.

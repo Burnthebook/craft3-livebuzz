@@ -1,17 +1,17 @@
 <?php
 /**
- * LiveBuzz plugin for Craft CMS 3.x
+ * Livebuzz plugin for Craft CMS 3.x
  *
- * Pulls venues, shows and events from a LiveBuzz XML feed and keeps your website in sync.
+ * Pulls Exhibitors from the the Livebuzz API to a website, it also updates and removes Exhibitors.
  *
  * @link      https://github.com/Burnthebook
  * @copyright Copyright (c) 2020 Burnthebook Ltd.
  */
 
 /**
- * LiveBuzz config.php
+ * Livebuzz config.php
  *
- * This file exists only as a template for the LiveBuzz settings.
+ * This file exists only as a template for the Livebuzz settings.
  * It does nothing on its own.
  *
  * Don't edit this file, instead copy it to 'craft/config' as 'livebuzz.php'
