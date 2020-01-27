@@ -35,7 +35,6 @@
         "hasCpSettings": true,
         "hasCpSection": true,
         "changelogUrl": "https://raw.githubusercontent.com/Burnthebook/craft3-livebuzz/master/CHANGELOG.md",
-        "basePath": "src",
         "components": {
             "syncService": "burnthebook\\livebuzz\\services\\SyncService",
             "tagsService": "burnthebook\\livebuzz\\services\\TagsService",
