@@ -42,10 +42,11 @@ class Install extends Migration
 
 		$this->createTable(Exhibitor::TABLE, [
 			'id' => $this->integer()->notNull(),
+			'identifier' => $this->char(255)->notNull(),
 			'companyName' => $this->char(255)->notNull(),
-			'logo' => $this->char(255)->notNull(),
-			'telephone' => $this->char(255)->notNull(),
-			'emailAddress' => $this->char(255)->notNull(),
+			'logo' => $this->char(255),
+			'telephone' => $this->char(255),
+			'emailAddress' => $this->char(255),
 			'websiteUrl' => $this->text(),
 			'addressesJson' => $this->text(),
 			'standsJson' => $this->text(),
@@ -58,6 +59,11 @@ class Install extends Migration
 		]);
 
 		// Create indices
+		$this
+			->createIndex(
+				$this->db->getIndexName(Exhibitor::TABLE, 'identifier'),
+				Exhibitor::TABLE,
+				'identifier');
 		$this
 			->createIndex(
 				$this->db->getIndexName(Exhibitor::TABLE, 'companyName'),

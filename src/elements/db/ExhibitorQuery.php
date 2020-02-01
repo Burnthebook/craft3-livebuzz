@@ -15,10 +15,26 @@ use burnthebook\livebuzz\elements\Exhibitor;
 class ExhibitorQuery extends ElementQuery
 {
 	public $companyName;
+	public $identifier;
+	public $excludeIdentifiers;
+
+	public function identifier($value)
+	{
+		$this->identifier = $value;
+
+		return $this;
+	}
 
 	public function name($value)
 	{
 		$this->companyName = $value;
+
+		return $this;
+	}
+
+	public function excludeIdentifiers($value)
+	{
+		$this->excludeIdentifiers = $value;
 
 		return $this;
 	}
@@ -29,6 +45,7 @@ class ExhibitorQuery extends ElementQuery
 
 		$this->query->select([
 			Exhibitor::TABLE_STD . '.logo',
+			Exhibitor::TABLE_STD . '.identifier',
 			Exhibitor::TABLE_STD . '.companyName',
 			Exhibitor::TABLE_STD . '.description',
 			Exhibitor::TABLE_STD . '.telephone',
@@ -41,6 +58,14 @@ class ExhibitorQuery extends ElementQuery
 
 		if ($this->companyName) {
 			$this->subQuery->andWhere(Db::parseParam(Exhibitor::TABLE_STD . '.companyName', $this->companyName));
+		}
+
+		if ($this->identifier) {
+			$this->subQuery->andWhere(Db::parseParam(Exhibitor::TABLE_STD . '.identifier', $this->identifier));
+		}
+		
+		if ($this->excludeIdentifiers) {
+			$this->subQuery->andWhere(['not in', Exhibitor::TABLE_STD . '.identifier', $this->excludeIdentifiers]);
 		}
 
 		return parent::beforePrepare();

@@ -15,12 +15,16 @@ use burnthebook\livebuzz\elements\Exhibitor;
 
 class TwigService extends Component
 {
-    public function events($criteria = null): ExhibitorQuery
-    {
-        $query = Exhibitor::find();
-        if ($criteria) {
-            Craft::configure($query, $criteria);
-        }
-        return $query;
-    }
+	/**
+	 * @param null $criteria
+	 * @return ExhibitorQuery
+	 */
+	public function exhibitors($criteria = null): ExhibitorQuery
+	{
+		$query = Exhibitor::find();
+		if ($criteria) {
+			Craft::configure($query, $criteria);
+		}
+		return $query;
+	}
 }

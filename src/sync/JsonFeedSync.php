@@ -11,203 +11,261 @@
 namespace burnthebook\livebuzz\sync;
 
 use Craft;
-use DateTime;
-use DateTimeZone;
 use Throwable;
 use burnthebook\livebuzz\elements\Exhibitor;
 use burnthebook\livebuzz\Livebuzz;
-use GuzzleHttp\Pool;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request;
+use \GuzzleHttp\Exception\GuzzleException;
 
 class JsonFeedSync
 {
-    // Public Properties
-    // =========================================================================
+	// Public Properties
+	// =========================================================================
 
-    /** @var string */
-    public $feedUrl;
+	/** @var string */
+	public $feedUrl;
 
-    /** @var string */
-    public $bearer;
+	/** @var string */
+	public $bearer;
 
-    /** @var callable */
-    public $setProgressFunction;
+	/** @var callable */
+	public $setProgressFunction;
 
-    // Private Properties
-    // =========================================================================
+	// Private Properties
+	// =========================================================================
 
-    private $entityCount = 0;
-    private $entityCounter = 0;
-    private $exhibitorRefs = [];
+	private $entityCount = 0;
+	private $entityCounter = 0;
+	private $identifiers = [];
 
-    // Public Methods
-    // =========================================================================
+	// Public Methods
+	// =========================================================================
 
-    /**
-     * @param callable|null $setProgressFunction A function that sets the progress of the sync.
-     * Accepts a number between 0 and 1 as the first parameter, and an optional label as the second
-     */
-    public function __construct(callable $setProgressFunction = null)
-    {
-        $this->setProgressFunction = $setProgressFunction;
-        $this->feedUrl = Livebuzz::getInstance()->getSettings()->jsonUrl;
-        $this->bearer = Livebuzz::getInstance()->getSettings()->authBearer;
-    }
+	/**
+	 * @param callable|null $setProgressFunction A function that sets the progress of the sync.
+	 * Accepts a number between 0 and 1 as the first parameter, and an optional label as the second
+	 */
+	public function __construct(callable $setProgressFunction = null)
+	{
+		$this->setProgressFunction = $setProgressFunction;
+		$this->feedUrl = Livebuzz::getInstance()->getSettings()->jsonUrl;
+		$this->bearer = Livebuzz::getInstance()->getSettings()->authBearer;
+	}
 
-    /**
-     * @throws Throwable
-     */
-    public function start()
-    {
-        echo "Starting sync from JSON ... \n";
+	/**
+	 * @throws Throwable
+	 * @throws GuzzleException
+	 */
+	public function start()
+	{
+		echo "Starting sync from JSON ... \n";
 
-        if (empty($this->feedUrl)) {
-            echo "No JSON URL specified. Exiting. \n";
-            return;
-        }
+		if (empty($this->feedUrl)) {
+			echo "No JSON URL specified. Exiting. \n";
+			return;
+		}
+
+		if (empty($this->bearer)) {
+			echo "No Bearer specified. Exiting. \n";
+			return;
+		}
 
 		$client = new Client();
 
-		$request = new Request(
-			"GET",
-			$this->feedUrl ."rest/v3/campaign/geo-connect-asia-2020/exhibitors/shanghai-merrypal-import-export-co-ltd?expand%5B0%5D=addresses&expand%5B0%5D=phones",
-			[
-				"Authorization" => $this->bearer
-			],
-			"");
+		$expandedParams = 'expand%5B%5D=files&expand%5B%5D=addresses&expand%5B%5D=links&expand%5B%5D=phones';
 
-		$response = $client->send($request);
-		echo "Response HTTP : " . $response->getStatusCode() . "";
-		$body = $response->getBody();
-		var_dump(json_decode($body, true));
-		die;
+		$exhibitors = [];
+		$json['next_page_url'] = $this->feedUrl . 'exhibitors?' . $expandedParams;
 
-        $json = simplexml_load_file($this->feedUrl);
+		while (filter_var($json['next_page_url'], FILTER_VALIDATE_URL)) {
+			echo $json['next_page_url'] . "\n";
+			$request = new Request(
+				"GET",
+				$json['next_page_url'],
+				["Authorization" => $this->bearer],
+				"");
 
-        $this->entityCount = $this->getEntityCount($json);
+			$response = $client->send($request);
+			if (200 !== $response->getStatusCode()) {
+				echo "Sync returned an error. \n";
+				return;
+			}
 
-        $this->syncExhibitors($json);
+			$body = $response->getBody();
+			$json = \GuzzleHttp\json_decode($body, true);
 
-        $this->processDeletions();
+			if (filter_var($json['next_page_url'], FILTER_VALIDATE_URL)) {
+				$json['next_page_url'] .= '&' . $expandedParams;
+			}
+			$exhibitors = array_merge_recursive($exhibitors, $json['data']);
+		}
 
-        echo "Sync finished. \n";
-    }
+		$this->entityCount = count($exhibitors);
 
-    // Private Methods
-    // =========================================================================
+		$this->syncExhibitors($exhibitors);
 
-    /**
-     * Gets the total number of Venues + Shows + Exhibitors that are present in the feed
-     * @param JsonFeedSync $json
-     * @return int
-     */
-    private function getEntityCount(JsonFeedSync $json)
-    {
-        $count = $json->count();
+		$this->processDeletions();
 
-        foreach ($json->venue as $venue) {
-            $count += count($venue->shows->show);
-            foreach ($venue->shows->show as $show) {
-                $count += count($show->exhibitors->exhibitor);
-            }
-        }
+		echo "Sync finished. \n";
+	}
 
-        return $count;
-    }
+	// Private Methods
+	// =========================================================================
 
-    /**
-     * @param JsonFeedSync $json
-     * @throws Throwable
-     */
-    private function syncExhibitors(JsonFeedSync $json)
-    {
-//        foreach ($json->exhibitors->exhibitor as $i => $xmlExhibitor) {
-//            $exhibitor = $this->getExhibitorFromXML($xmlExhibitor, $show);
-//
-//            if (!$exhibitor->exhibitorRef) {
-//                echo "Missing exhibitorRef at iteration $i \n";
-//                continue;
-//            }
-//
-//            /** @var Exhibitor $oldExhibitor */
-//            $oldExhibitor = Exhibitor::find()->exhibitorRef($exhibitor->exhibitorRef)->one();
-//
-//            if ($oldExhibitor) {
-//                if ($exhibitor->isDifferent($oldExhibitor)) {
-//                    echo "Updating Exhibitor Ref $exhibitor->exhibitorRef ... \n";
-//                    $exhibitor->syncToElement($oldExhibitor);
-//                    $exhibitor = $oldExhibitor;
-//                    Craft::$app->elements->saveElement($oldExhibitor, false);
-//                } else {
-//                    echo "Skipping Exhibitor Ref $exhibitor->exhibitorRef - no change detected ... \n";
-//                    $exhibitor = $oldExhibitor;
-//                }
-//            } else {
-//                echo "Creating Exhibitor Ref $exhibitor->exhibitorRef ... \n";
-//                Craft::$app->elements->saveElement($exhibitor, false);
-//            }
-//
-//            // store exhibitor ref so we can sort out deletions later on
-//            $this->exhibitorRefs[] = $exhibitor->exhibitorRef;
-//
-//            $this->updateSyncProgress();
-//        }
-    }
+	/**
+	 * @param array $exhibitors
+	 * @throws Throwable
+	 */
+	private function syncExhibitors($exhibitors)
+	{
+		foreach ($exhibitors as $i => $exhibitorData) {
+			$exhibitorElement = $this->getExhibitorFromJson($exhibitorData);
 
-    /**
-     * Deletes elements that were not present in the JSON feed
-     * @throws Throwable
-     */
-    private function processDeletions()
-    {
-        $deleteExhibitors = Exhibitor::find()->excludeExhibitorRefs($this->exhibitorRefs)->all();
-        /** @var Exhibitor $deleteExhibitor */
-        foreach ($deleteExhibitors as $deleteExhibitor) {
-            echo "Deleting Exhibitor Ref $deleteExhibitor->exhibitorRef ... \n";
-            Craft::$app->elements->deleteElement($deleteExhibitor, true);
-        }
-    }
+			if (!$exhibitorElement->identifier) {
+				echo "Missing identifier at iteration $i \n";
+				continue;
+			}
 
-    /**
-     * @param JsonFeedSync $json
-     * @return Exhibitor
-     * @throws Throwable
-     */
-    private function getExhibitorFromJson(JsonFeedSync $json): Exhibitor
-    {
-        $exhibitor = new Exhibitor();
-//        $exhibitor->showId = $show->id;
-//        $exhibitor->exhibitorRef = isset($xml['id']) ? (integer)$xml['id'] : null;
-//        $exhibitor->name = trim($xml->name);
-//        $exhibitor->dateTime = $this->getDateTimeFromXML($xml2, 'date_time');
-//        $exhibitor->openingTime = $this->getDateTimeFromXML($xml2, 'opening_time');
-//        $exhibitor->onSaleTime = $this->getDateTimeFromXML($xml2, 'onsale_time');
-//        $exhibitor->duration = (integer)trim($xml2->duration);
-//        $exhibitor->available = (integer)trim($xml2->available);
-//        $exhibitor->capacity = (integer)trim($xml2->capacity);
-//        $exhibitor->venueLayout = trim($xml->venue_layout);
-//        $exhibitor->comment = trim($xml2->comment);
-//        $exhibitor->url = trim($xml2->url);
-//        $exhibitor->status = trim($xml2->status);
-//        $exhibitor->fee = (float)trim($xml2->transaction->fee);
-//        $exhibitor->feeCurrency = trim($xml2->transaction->fee->attributes()['currency']);
-//        $exhibitor->maximumTickets = (integer)trim($xml2->transaction->maximum_tickets);
-//        $exhibitor->prices = [];
+			/** @var Exhibitor $oldExhibitor */
+			$oldExhibitor = Exhibitor::find()->identifier($exhibitorElement->identifier)->one();
 
-        return $exhibitor;
-    }
+			if ($oldExhibitor) {
+				if ($exhibitorElement->isDifferent($oldExhibitor)) {
+					echo "Updating Exhibitor Identifier $exhibitorElement->identifier ... \n";
+					$exhibitorElement->syncToElement($oldExhibitor);
+					$exhibitorElement = $oldExhibitor;
+					$oldExhibitor = $this->storeExhibitorLogo($oldExhibitor);
+					Craft::$app->elements->saveElement($oldExhibitor, false);
+				} else {
+					echo "Skipping Exhibitor Identifier $exhibitorElement->identifier - no change detected ... \n";
+					$exhibitorElement = $oldExhibitor;
+				}
+			} else {
+				echo "Creating Exhibitor Identifier $exhibitorElement->identifier ... \n";
+				$exhibitorElement = $this->storeExhibitorLogo($exhibitorElement);
+				Craft::$app->elements->saveElement($exhibitorElement, false);
+			}
+			// store exhibitor Identifier so we can sort out deletions later on
+			$this->identifiers[] = $exhibitorElement->identifier;
 
+			$this->updateSyncProgress();
+		}
+	}
 
-    private function updateSyncProgress()
-    {
-        $this->entityCounter++;
+	/**
+	 * @param Exhibitor $exhibitorElement
+	 * @return Exhibitor
+	 */
+	private function storeExhibitorLogo(Exhibitor $exhibitorElement)
+	{
+		if (!filter_var($exhibitorElement->logo, FILTER_VALIDATE_URL)) {
+			return $exhibitorElement;
+		}
 
-        if (is_callable($this->setProgressFunction)) {
-            ($this->setProgressFunction)(
-                $this->entityCounter / $this->entityCount,
-                "Processed $this->entityCounter out of $this->entityCount."
-            );
-        }
-    }
+		$parts = explode('.', $exhibitorElement->logo);
+		$filename = md5($exhibitorElement->logo) . '.' . end($parts);
+		$imagePath = CRAFT_BASE_PATH . '/web/images/uploads/' . $filename;
+
+		if (file_exists($imagePath)) {
+			echo "Logo exists - do not store\n";
+			return $exhibitorElement;
+		}
+
+		echo "Storing a new logo\n";
+
+		$imageUri = '/images/uploads/' . $filename;
+		file_put_contents($imagePath, file_get_contents($exhibitorElement->logo));
+		$exhibitorElement->logo = $imageUri;
+
+		return $exhibitorElement;
+	}
+
+	/**
+	 * Deletes elements that were not present in the JSON feed
+	 * @throws Throwable
+	 */
+	private function processDeletions()
+	{
+		$deleteExhibitors = Exhibitor::find()->excludeIdentifiers($this->identifiers)->all();
+		/** @var Exhibitor $deleteExhibitor */
+		foreach ($deleteExhibitors as $deleteExhibitor) {
+			echo "Deleting Exhibitor Identifier $deleteExhibitor->identifier ... \n";
+			if ($deleteExhibitor->logo) {
+				if (file_exists(CRAFT_BASE_PATH . '/web/' . $deleteExhibitor->logo)) {
+					unlink(CRAFT_BASE_PATH . '/web/' . $deleteExhibitor->logo);
+				}
+			}
+			Craft::$app->elements->deleteElement($deleteExhibitor);
+		}
+	}
+
+	/**
+	 * @param array $exhibitorData
+	 * @return Exhibitor
+	 * @throws Throwable
+	 */
+	private function getExhibitorFromJson($exhibitorData): Exhibitor
+	{
+		$exhibitor = new Exhibitor();
+		$exhibitor->identifier = trim($exhibitorData['identifier']);
+		$exhibitor->companyName = trim($exhibitorData['name']);
+
+		$exhibitor->description = trim($exhibitorData['biography']);
+		$exhibitor->emailAddress = trim(strtolower($exhibitorData['website_email']));
+		$exhibitor->websiteUrl = null;
+
+		if (!empty($exhibitorData['phones'])) {
+			$exhibitor->telephone = $exhibitorData['phones'][0]['number_international'];
+		}
+
+		if (!empty($exhibitorData['addresses'])) {
+			$exhibitorData['addresses'] = array_map(function ($n) {
+				return [
+					'line_1' => $n['line_1'],
+					'line_2' => $n['line_2'],
+					'line_3' => $n['line_3'],
+					'city' => $n['city'],
+					'county' => $n['county'],
+					'region' => $n['region'],
+					'country' => $n['country']
+				];
+			}, $exhibitorData['addresses']);
+			$exhibitor->addresses = $exhibitorData['addresses'];
+		}
+
+		if (!empty($exhibitorData['links'])) {
+			$exhibitorData['links'] = array_map(function ($n) {
+				return [
+					'type' => $n['type'],
+					'url' => $n['url']
+				];
+			}, $exhibitorData['links']);
+			$exhibitor->socialMediaChannels = $exhibitorData['links'];
+		}
+
+		$exhibitor->stands = $exhibitorData['stands'];
+
+		if (!empty($exhibitorData['files'])) {
+			foreach ($exhibitorData['files'] as $file) {
+				if ('profile_logo' == $file['identifier']) {
+					$exhibitor->logo = $file['url'];
+				}
+			}
+		}
+
+		return $exhibitor;
+	}
+
+	private function updateSyncProgress()
+	{
+		$this->entityCounter++;
+
+		if (is_callable($this->setProgressFunction)) {
+			($this->setProgressFunction)(
+				$this->entityCounter / $this->entityCount,
+				"Processed $this->entityCounter out of $this->entityCount."
+			);
+		}
+	}
 }

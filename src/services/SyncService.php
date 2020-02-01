@@ -14,6 +14,7 @@ use Throwable;
 use craft\base\Component;
 use yii\db\Query;
 use burnthebook\livebuzz\jobs\SyncJob;
+use \GuzzleHttp\Exception\GuzzleException;
 
 /**
  * @author    Jake Noble
@@ -27,11 +28,12 @@ class SyncService extends Component
     // Public Methods
     // =========================================================================
 
-    /**
-     * @param callable|null $setProgressFunction A function that sets the progress of the sync.
-     * Accepts a number between 0 and 1 as the first parameter, and an optional label as the second
-     * @throws Throwable
-     */
+	/**
+	 * @param callable|null $setProgressFunction A function that sets the progress of the sync.
+	 * Accepts a number between 0 and 1 as the first parameter, and an optional label as the second
+	 * @throws Throwable
+	 * @throws GuzzleException
+	 */
     public function startJsonFeedSync(callable $setProgressFunction = null)
     {
         (new JsonFeedSync($setProgressFunction))->start();

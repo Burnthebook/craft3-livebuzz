@@ -12,6 +12,7 @@ use Craft;
 use Throwable;
 use craft\queue\BaseJob;
 use burnthebook\livebuzz\Livebuzz;
+use \GuzzleHttp\Exception\GuzzleException;
 
 /**
  * @author    Jake Noble
@@ -20,47 +21,48 @@ use burnthebook\livebuzz\Livebuzz;
  */
 class SyncJob extends BaseJob
 {
-    // Public Methods
-    // =========================================================================
+	// Public Methods
+	// =========================================================================
 
-    public $manual = false;
+	public $manual = false;
 
-    // Public Methods
-    // =========================================================================
+	// Public Methods
+	// =========================================================================
 
-    /**
-     * @inheritDoc
-     * @throws Throwable
-     */
-    public function execute($queue)
-    {
-        $job = $this;
+	/**
+	 * @param \craft\queue\QueueInterface|\yii\queue\Queue $queue
+	 * @throws Throwable
+	 * @throws GuzzleException
+	 */
+	public function execute($queue)
+	{
+		$job = $this;
 
-        $setProgressFunction = function ($progress, $label = null) use ($job, $queue) {
-            $job->setProgress($queue, $progress, $label);
-        };
+		$setProgressFunction = function ($progress, $label = null) use ($job, $queue) {
+			$job->setProgress($queue, $progress, $label);
+		};
 
 		Livebuzz::getInstance()->syncService->startJsonFeedSync($setProgressFunction);
-    }
+	}
 
-    public static function getDefaultDescription(): string
-    {
-        return Craft::t('livebuzz', 'Livebuzz Sync');
-    }
+	public static function getDefaultDescription(): string
+	{
+		return Craft::t('livebuzz', 'Livebuzz Sync');
+	}
 
-    public static function getDefaultManualDescription(): string
-    {
-        return Craft::t('livebuzz', 'Livebuzz Sync (Manual)');
-    }
+	public static function getDefaultManualDescription(): string
+	{
+		return Craft::t('livebuzz', 'Livebuzz Sync (Manual)');
+	}
 
-    // Protected Methods
-    // =========================================================================
+	// Protected Methods
+	// =========================================================================
 
-    /**
-     * @inheritdoc
-     */
-    protected function defaultDescription(): string
-    {
-        return $this->manual ? self::getDefaultManualDescription() : self::getDefaultDescription();
-    }
+	/**
+	 * @inheritdoc
+	 */
+	protected function defaultDescription(): string
+	{
+		return $this->manual ? self::getDefaultManualDescription() : self::getDefaultDescription();
+	}
 }
