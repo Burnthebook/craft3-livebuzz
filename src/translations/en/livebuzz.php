@@ -18,7 +18,7 @@ return [
     'URL' => 'URL',
     'Bearer' => 'Bearer',
     'Enter Bearer Authorisation for Livebuzz. E.g. Bearer 123ABC' => 'Enter Bearer Authorisation for Livebuzz. E.g. Bearer 123ABC',
-    'Enter the URL to your Livebuzz Exhibitor JSON API - this should include the Campaign handle for which you want to pull Exhibitors from. E.g. https://my-name.control.buzz/rest/v3/campaign/campaign-name/' => 'Enter the URL to your Livebuzz Exhibitor JSON API - this should include the Campaign handle for which you want to pull Exhibitors from. E.g. https://my-name.control.buzz/rest/v3/campaign/campaign-name/',
+    'Enter the URL to your Livebuzz Exhibitor JSON API - this should include the Campaign identifier for which you want to pull Exhibitors from. E.g. https://{org-name}.control.buzz/rest/v3/campaign/{campaign-identifier}' => 'Enter the URL to your Livebuzz Exhibitor JSON API - this should include the Campaign identifier for which you want to pull Exhibitors from. E.g. https://{org-name}.control.buzz/rest/v3/campaign/{campaign-identifier}',
     'Auto Sync' => 'Auto Sync',
     'Automatically sync from the JSON feed.' => 'Automatically sync from the JSON feed.',
     'Sync interval' => 'Sync interval',
