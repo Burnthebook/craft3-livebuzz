@@ -17,7 +17,7 @@
 
 {{ forms.textField({
     label: 'URL'|t('livebuzz'),
-    instructions: 'Enter the URL to your Livebuzz JSON API.'|t('livebuzz'),
+    instructions: 'Enter the URL to your Livebuzz Exhibitor JSON API. E.g. https://my-name.control.buzz/rest/v3/campaign/campaign-name/'|t('livebuzz'),
     id: 'jsonUrl',
     name: 'jsonUrl',
     value: settings['jsonUrl']})
@@ -25,7 +25,7 @@
 
 {{ forms.textField({
     label: 'Bearer'|t('livebuzz'),
-    instructions: 'Enter Bearer Authorisation for Livebuzz.'|t('livebuzz'),
+    instructions: 'Enter Bearer Authorisation for Livebuzz. E.g. Bearer 123ABC'|t('livebuzz'),
     id: 'authBearer',
     name: 'authBearer',
     value: settings['authBearer']})
