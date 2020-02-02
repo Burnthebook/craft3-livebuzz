@@ -1,5 +1,3 @@
-# TODO
-
 # Livebuzz plugin for Craft CMS 3.x
 
 This plugin will pull in Exhibitors from the the LiveBuzz API to a website, it also updates and removes Exhibitors.
