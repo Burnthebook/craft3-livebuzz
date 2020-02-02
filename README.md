@@ -60,7 +60,7 @@ Exhibitor elements have the following properties:
 
 - `id` - Craft's Exhibitor ID. Note this is different from Livebuzz's Exhibitor ID.
 - `identifier` - Livebuzz's Exhibitor ID.
-- `comapnyName` - Exhibitor's company name.
+- `companyName` - Exhibitor's company name.
 - `logo` - Exhibitor's logo as a relative path.
 - `description` - Exhibitor's biography.
 - `telephone` - Exhibitor's telephone number in international format.
