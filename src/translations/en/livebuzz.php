@@ -26,6 +26,7 @@ return [
     'Sync has been started' => 'Sync has been started',
     'minutes' => 'minutes',
     'Name' => 'Name',
+	'Company Name' => 'Company Name',
     'Exhibitor' => 'Exhibitor',
     'Exhibitors' => 'Exhibitors',
     'All Exhibitors' => 'All Exhibitors',

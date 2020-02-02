@@ -84,22 +84,20 @@ class Exhibitor extends AbstractComparableElement
 	protected static function defineSortOptions(): array
 	{
 		return [
-			'companyName' => \Craft::t('livebuzz', 'Company Name'),
-			'description' => \Craft::t('livebuzz', 'Description'),
+			'companyName' => \Craft::t('livebuzz', 'Company Name')
 		];
 	}
 
 	protected static function defineTableAttributes(): array
 	{
 		return [
-			'companyName' => \Craft::t('livebuzz', 'Company Name'),
-			'description' => \Craft::t('livebuzz', 'Description'),
+			'companyName' => \Craft::t('livebuzz', 'Company Name')
 		];
 	}
 
 	protected static function defineSearchableAttributes(): array
 	{
-		return ['identifier', 'companyName', 'description'];
+		return ['companyName'];
 	}
 
 	protected static function defineSources(string $context = null): array
@@ -123,7 +121,7 @@ class Exhibitor extends AbstractComparableElement
 	{
 		return [
 			[['companyName'], 'string'],
-			[['companyName', 'description'], 'required'],
+			[['companyName', 'identifier'], 'required'],
 		];
 	}
 
