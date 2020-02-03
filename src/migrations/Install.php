@@ -69,11 +69,5 @@ class Install extends Migration
 				$this->db->getIndexName(Exhibitor::TABLE, 'companyName'),
 				Exhibitor::TABLE,
 				'companyName');
-
-		$this->createIndex(
-			$this->db->getIndexName(Exhibitor::TABLE, 'description'),
-			Exhibitor::TABLE,
-			'description'
-		);
 	}
 }
