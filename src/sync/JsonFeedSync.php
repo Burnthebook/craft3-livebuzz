@@ -166,15 +166,16 @@ class JsonFeedSync
 		$parts = explode('.', $exhibitorElement->logo);
 		$filename = md5($exhibitorElement->logo) . '.' . end($parts);
 		$imagePath = CRAFT_BASE_PATH . '/web/images/uploads/' . $filename;
+		$imageUri = '/images/uploads/' . $filename;
 
 		if (file_exists($imagePath)) {
 			echo "Logo exists - do not store\n";
+			$exhibitorElement->logo = $imageUri;
 			return $exhibitorElement;
 		}
 
 		echo "Storing a new logo\n";
 
-		$imageUri = '/images/uploads/' . $filename;
 		file_put_contents($imagePath, file_get_contents($exhibitorElement->logo));
 		$exhibitorElement->logo = $imageUri;
 

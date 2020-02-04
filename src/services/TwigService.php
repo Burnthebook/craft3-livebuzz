@@ -27,4 +27,8 @@ class TwigService extends Component
 		}
 		return $query;
 	}
+
+	public function exhibitorByIdentifier($identifier) {
+		return Exhibitor::findOne(['identifier' => $identifier]);
+	}
 }
