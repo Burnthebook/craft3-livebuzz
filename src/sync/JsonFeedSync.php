@@ -120,6 +120,9 @@ class JsonFeedSync
 	private function syncExhibitors($exhibitors)
 	{
 		foreach ($exhibitors as $i => $exhibitorData) {
+			if ('active' != $exhibitorData['status']) {
+				continue;
+			}
 			$exhibitorElement = $this->getExhibitorFromJson($exhibitorData);
 
 			if (!$exhibitorElement->identifier) {

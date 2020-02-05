@@ -2,7 +2,7 @@
     "name": "burnthebook/craft3-livebuzz",
     "description": "Pulls Exhibitors from the the LiveBuzz API to a website, it also updates and removes Exhibitors.",
     "type": "craft-plugin",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "keywords": [
         "craft",
         "cms",
